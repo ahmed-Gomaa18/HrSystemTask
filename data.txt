@@ -1,0 +1,11 @@
+
+# Sample proper data to be used for testing.
+
+
+ username          password        role
+
+1 admin            admin           admin 
+2 ahmed18          ahmed18         admin
+3 nadaa10          nadaa10         employee
+4 mohamed20        mohamed20       employee
+5 islam15          islam15         employee
