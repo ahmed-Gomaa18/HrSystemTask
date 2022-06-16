@@ -1,7 +1,7 @@
-
 # HR Management system Task
 
 The goal of this task is tracking the employee's attendance.
+
 
 
 ## The Database used
@@ -37,20 +37,7 @@ Then open admin page by `http://127.0.0.1:8000/admin/` username:admin & password
 And create two objects ***admin & employee*** in Group Model and after create employee 
 you can division users to admins and employees by groups attrpute in user object  
 
->OR use Default sqlite3
-
-
-## The Database used
-
-```bash
-$ pip install -r requirements.txt
-
-python manage.py makemigrations
-
-python manage.py migrate
-
-python manage.py runserver
-```
+***OR use Default sqlite3***
 
 
 ## Configurations needed to run the code.
@@ -59,19 +46,38 @@ python manage.py runserver
 
 ```bash
 pip install -r requirements.txt
+
+python manage.py makemigrations
+
+python manage.py migrate
+
 ```
 
 
 ## How to run the code
 
->Run the following set of commands
+>Run the following command line
 
 ```bash
-python manage.py makemigrations
-
-python manage.py migrate
-
 python manage.py runserver
+```
+
+```
+*And test the following set of URLS*
+
+http://localhost/api/register/
+http://localhost/api/login/
+http://localhost/api/user/
+http://localhost/api/logout/
+http://localhost/api/check-in
+http://localhost/api/check-out/attendance-<str:attendance_pk>/
+http://localhost/api/list-attendances/
+http://localhost/api/list-attendances-all/
+http://localhost/api/'check-in-again/attendance-<str:attendance_pk>/
+http://localhost/api/check-out-again/attendance-<str:attendance_pk>/'
+
+Replace <str:attendance_pk> by attendance id
+
 ```
 
 
@@ -79,7 +85,7 @@ python manage.py runserver
 
 ```
 I completed this task by Web framework Django, Django rest framework and signals behind As expected, the outputs of this program will be API.
- I used Postman to test all urls and functions alot of error cases However the project worked fine.
+I used Postman to test all urls, functions and alot of error cases However the project worked fine without bugs.
 ```
 
 
