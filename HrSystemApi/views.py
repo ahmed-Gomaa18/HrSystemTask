@@ -57,17 +57,12 @@ def get_user(request):
 
 
 @api_view(['post'])
-def check_in(request, employee_pk):
-    employee = get_object_or_404(User, pk=employee_pk)
+def check_in(request):
     user = request.user
     
     # Check if user login by Token
     if not user.is_authenticated:
         return Response({"Erorr": 'You are not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    # Check if Employee can't log attendance for another employee
-    if user != employee:
-        return Response({"Error": "You can't log attendance for another empolyee."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Check if employee Check-in before that
     if user.attendance.all().filter(check_out=None):
@@ -95,21 +90,16 @@ def check_in(request, employee_pk):
 
 
 @api_view(['post'])
-def check_out(request, employee_pk, attendance_pk):
-    employee = get_object_or_404(User, pk=employee_pk)
+def check_out(request, attendance_pk):
     attendance = get_object_or_404(Attendance, pk=attendance_pk)
     user = request.user
     # Check if user login by Token
     if not user.is_authenticated:
         return Response({"Erorr": 'You are not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    # Check if authentication employee that correct to check-out
-    if user != employee :
-        return Response({"Error": "You Can't Check-out to another empolyee."}, status=status.HTTP_400_BAD_REQUEST)
-
     # Check if this attendance for the correct employee
-    if attendance.employee != employee:
-        return Response({"Error": f"This attendance not for this employee {employee}."}, status=status.HTTP_400_BAD_REQUEST)
+    if attendance.employee != user:
+        return Response({"Error": f"You Can't Check-out to another empolyee."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Empolyee can't check-out with out check-in || check-out twice in a row
     if attendance.check_out != None:
@@ -136,20 +126,16 @@ def check_out(request, employee_pk, attendance_pk):
 
 
 @api_view(['POST'])
-def check_in_again(request, employee_pk, attendance_pk):
-    employee = get_object_or_404(User, pk=employee_pk)
+def check_in_again(request, attendance_pk):
     attendance = get_object_or_404(Attendance, pk=attendance_pk)
     user = request.user
     # Check if user login by Token
     if not user.is_authenticated:
         return Response({"Erorr": 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    # Check if authentication employee that correct check-out
-    if user != employee :
-        return Response({"Error": "You Can't Check-out to another Empolyee"}, status=status.HTTP_400_BAD_REQUEST   )
-
+    
+    # Check if this attendance for the correct employee
     if attendance.employee != user:
-        return Response({"Error": f"This attendance not for the employee {user}."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"Error": "You Can't Check-in to another Empolyee."}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = AttendanceSerializer(instance=attendance, data=request.data)
     if serializer.is_valid():
@@ -181,20 +167,16 @@ def check_in_again(request, employee_pk, attendance_pk):
 
 
 @api_view(['POST'])
-def check_out_again(request, employee_pk, attendance_pk):
-    employee = get_object_or_404(User, pk=employee_pk)
+def check_out_again(request, attendance_pk):
     attendance = get_object_or_404(Attendance, pk=attendance_pk)
     user = request.user
     # Check if user login by Token
     if not user.is_authenticated:
-        return Response({"Erorr": 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    # Check if authentication employee that correct check-out
-    if user != employee :
-        return Response({"Error": "You Can't Check-out to another Empolyee"}, status=status.HTTP_400_BAD_REQUEST)
-
+        return Response({"Erorr": 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)   
+    
+    # Check if this attendance for the correct employee
     if attendance.employee != user:
-        return Response({"Error": f"This attendance not for the employee {user}."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"Error": "You Can't Check-out to another Empolyee."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Empolyee can't check-out with out check-in || check-out twice in a row
     if attendance.check_out != None:
@@ -221,20 +203,16 @@ def check_out_again(request, employee_pk, attendance_pk):
 
 # For Employee
 @api_view(['GET'])
-def list_attendances(request, employee_pk):
-    employee = get_object_or_404(User, pk=employee_pk)
+def list_attendances(request):
     user = request.user
     # Check if user login by Token
     if not user.is_authenticated:
         return Response({"Erorr": 'User not authenticated'}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Check if Employee can't see list of attendances for another employee
-    if user != employee:
-        return Response({"Error": "You can't see another employee's attendance list."}, status=status.HTTP_400_BAD_REQUEST)
-
+    
     # Get all attendance records completed and associated with this employee
     employee_attendances = user.attendance.all().exclude(check_out=None)
     serializer = AttendanceSerializer(employee_attendances, many=True)
+    
     # If employee has records
     if serializer:
         return Response(serializer.data, status=status.HTTP_200_OK)
