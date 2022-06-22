@@ -10,7 +10,6 @@ def post_save_attendance(sender, instance, created, **kwargs):
         instance.hours()
         # Calculate total_overtime_hours
         instance.get_overtime()
-        print("Hello....")
         # Disconnect
         post_save.disconnect(post_save_attendance, sender=sender)
         # Save attendance

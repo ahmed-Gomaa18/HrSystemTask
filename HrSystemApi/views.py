@@ -70,6 +70,12 @@ def check_in(request):
 
     serializer = AttendanceSerializer(data=request.data)
     if serializer.is_valid():
+        # Check if check-in is sent
+        try:
+            serializer.validated_data['check_in']
+        except KeyError:
+            return Response({"Error": "You must send ['check_in'] in your request."}, status=status.HTTP_400_BAD_REQUEST)
+
         # Check if employee check-in late
         if str(serializer.validated_data['check_in']) > '09:00:00':
             serializer.validated_data['arrive'] = 'Arrival late'
@@ -99,7 +105,7 @@ def check_out(request, attendance_pk):
 
     # Check if this attendance for the correct employee
     if attendance.employee != user:
-        return Response({"Error": f"You Can't Check-out to another empolyee."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"Error": "You Can't Check-out to another empolyee."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Empolyee can't check-out with out check-in || check-out twice in a row
     if attendance.check_out != None:
@@ -107,9 +113,14 @@ def check_out(request, attendance_pk):
 
     serializer = AttendanceSerializer(instance=attendance, data=request.data)
     if serializer.is_valid():
+        # Check if check-out is sent
+        try:
+            serializer.validated_data['check_out']
+        except KeyError:
+            return Response({"Error": "You must send ['check_out'] in your request."}, status=status.HTTP_400_BAD_REQUEST)
         
         # Check-out must be always bigger than check-in time.
-        if serializer.validated_data['check_out'] < attendance.check_in:
+        if serializer.validated_data['check_out'] <= attendance.check_in:
             return Response({"Error": "Check-out must be always bigger than check-in time."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Check if employee check-out early
@@ -136,6 +147,10 @@ def check_in_again(request, attendance_pk):
     # Check if this attendance for the correct employee
     if attendance.employee != user:
         return Response({"Error": "You Can't Check-in to another Empolyee."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Empolyee can't check-in without check-out || check-in twice in a row
+    if attendance.check_out == None:
+        return Response({"Error": "You are already Check-in. Or You can't check-in twice in a row."}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = AttendanceSerializer(instance=attendance, data=request.data)
     if serializer.is_valid():
@@ -178,7 +193,7 @@ def check_out_again(request, attendance_pk):
     if attendance.employee != user:
         return Response({"Error": "You Can't Check-out to another Empolyee."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Empolyee can't check-out with out check-in || check-out twice in a row
+    # Empolyee can't check-out without check-in || check-out twice in a row
     if attendance.check_out != None:
         return Response({"Error": "You are already Check-out. Or You can't check-out twice in a row."}, status=status.HTTP_400_BAD_REQUEST)
 
